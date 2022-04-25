@@ -1,6 +1,4 @@
-
-
-// PIC32MX270F256B Configuration Bit Settings
+// PIC32MX470F512H Configuration Bit Settings
 
 // 'C' source line config statements
 
@@ -43,7 +41,7 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
-#include "./p32mx270f256b.h"
+#include "./p32mx470f512h.h"
 #include "functions.h"
 
 uint8_t update = 0;
