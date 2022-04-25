@@ -50,55 +50,52 @@ uint8_t update = 0;
 
 void main(void) {
     //SYSCLOCK = 40MHz
-    //PBxCLK = SYSCLOCK / 2
+    //PBCLK = SYSCLOCK / 2
 
-    ANSELA = 0;
+    ANSELA = 0; //Odłączenie wszystkich portów od przetwornika ADC
     ANSELB = 0;
 
-    RPB13Rbits.RPB13R = 0b0011; //RPB13 as SDO1
-    TRISBbits.TRISB13 = 0; //SDO1
-    TRISBbits.TRISB14 = 0; //SCK1
-    TRISBbits.TRISB15 = 0; //OE1
+    RPB13Rbits.RPB13R = 0b0011; //RPB13 jako SDO1
+    TRISBbits.TRISB13 = 0; //RB13 jak wyjście SDO1
+    TRISBbits.TRISB14 = 0; //RB14 jako wyjście SCK1
+    TRISBbits.TRISB15 = 0; //RB15 jak wyjście OE1
 
-    //T23 configuration
+    //konfiguracja T32
     T2CON = 0;
     T3CON = 0;
-    T2CONbits.TCKPS = 0b0111;
-    T2CONbits.T32 = 0b0001;
-    PR2 = 0xFFFF;
+    T2CONbits.TCKPS = 0b0111; //Częstotliwość licznika wynosi PBCLK / 256
+    T2CONbits.T32 = 0b0001; //Liczniki T3 oraz T2 pracują razem jako licznik 32 bitowy 
+    PR2 = 0xFFFF; //Przepełnienie następuje przy wartości 0xFFFFFFFFFF
     PR3 = 0xFFFF;
-    T2CONbits.ON = 1;
+    T2CONbits.ON = 1; //Licznik zostaje uruchomiony
 
-    //Wait 1000ms
+    //Poczekaj aż wartość licznika osiągnie liczbę 78125. Program czeka w tym miejscu przez 1000ms
     while ((TMR3 << 16 | TMR2) <= 78125) {
     }
 
-    T2CONbits.ON = 0;
-    TMR2 = 0;
-    TMR3 = 0;
+    T2CONbits.ON = 0; //Licznik zostaje wyłączony
+    TMR2 = 0; //Wyzerowanie wartości licznika
+    TMR3 = 0; 
 
-    SPI_config();
-    Display_config();
-    Display_clear();
-    asm volatile("di");
-    RTCC_Init();
-    RTCC_Update();
-    asm volatile("ei");
-
+    SPI_config(); //Konfiguracja interfejsu SPI1
+    Display_config(); //Konfiguracja sterowników MAX7219
+    Display_clear(); //Wyczyszczenie wyświetlacza 
+	
+ //Wyświetlenie przykładowego tekstu na wyświetlaczu.
+    Print_at_X_Y(0, 4, '1'); 
+    Print_at_X_Y(8, 4, '4');
+    Print_at_X_Y(16, 4, ':');
+    Print_at_X_Y(24, 4, '2');
+    Print_at_X_Y(32, 4, '2');
+    Print_at_X_Y(40, 4, ':');
+    Print_at_X_Y(48, 4, '3');
+    Print_at_X_Y(56, 4, '6');
+ //Na wyświetlaczy pojawi się napis "14:22:36"
+    Send_data_to_display(); //Wysłanie danych do wyświetlacza 
+	
+    
     while (1) {
-        if (update != RTCTIMEbits.SEC01) {
-            update = RTCTIMEbits.SEC01;
-            Print_at_X_Y(0, 4, (RTCTIMEbits.HR10 + 48));
-            Print_at_X_Y(8, 4, (RTCTIMEbits.HR01 + 48));
-            Print_at_X_Y(16, 4, ':');
-            Print_at_X_Y(24, 4, (RTCTIMEbits.MIN10 + 48));
-            Print_at_X_Y(32, 4, (RTCTIMEbits.MIN01 + 48));
-            Print_at_X_Y(40, 4, ':');
-            Print_at_X_Y(48, 4, (RTCTIMEbits.SEC10 + 48));
-            Print_at_X_Y(56, 4, (RTCTIMEbits.SEC01 + 48));
-            Send_data_to_display();
-        }
-
     }
 }
+
 

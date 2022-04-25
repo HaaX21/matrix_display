@@ -3,31 +3,6 @@
 extern uint8_t Font[][8];
 uint64_t ROWS[16];
 
-void RTCC_Init(void) {
-    SYSKEY = 0x0; //force lock
-    SYSKEY = 0xaa996655; // write first unlock key to SYSKEY
-    SYSKEY = 0x556699aa; // write second unlock key to SYSKEY
-    RTCCONbits.RTCWREN = 1;
-    RTCCONbits.RTSECSEL = 0b0001;
-    RTCCONbits.ON = 1;
-    while (!RTCCONbits.RTCCLKON) {
-    }
-}
-
-void RTCC_Update(void) {
-    RTCCONbits.ON = 0;
-    while (RTCCONbits.RTCCLKON) {
-    }
-    RTCTIME = 0x14180000;
-    RTCDATE = 0x06102705;
-    RTCCONbits.ON = 1;
-    RTCCONbits.RTCWREN = 0;
-    SYSKEY = 0x0; //force lock
-    while (!RTCCONbits.RTCCLKON) {
-    }
-}
-
-
 void SPI1_write_to_buffer(uint8_t byte) {
     while (SPI1STATbits.SPITBF);
     SPI1BUF = byte;
